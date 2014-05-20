@@ -22,7 +22,7 @@ my $debug = 0;			# Debug level
 #my $config_dir = '/usr/local/squid-2.6/etc/drupal-accel/drupal-holding-cfgs';
 #my $config_dir = '/usr/local/squid/etc/drupal-accel/drupal-accel-cfgs';
 my $config_dir = '/etc/squid/drupal-accel/drupal-accel-cfgs';
-my %allowed_types = (site => 1, 301 => 1, 302 => 1, static => 1);
+my %allowed_types = (site => 1, 301 => 1, 302 => 1, static => 1, hub => 1);
 my %pages = (NOTKNOWN => '302:http://www.sift.com/accel-error.html');
 #my %pages = (NOTKNOWN => '302:http://172.20.0.50/general_holding/index.html');
 
@@ -165,7 +165,18 @@ sub rewrite {
 	    } elsif ($rule->{type} eq 'static') {
 		# Do a holding page
 		$newurl = $rule->{target};
-	    } else {
+            } elsif ($rule->{type} eq 'hub') {
+                # Match the prefix by running the regex again 
+                # We'll definately have a value because the earlier match would have failed otherwise
+                my ($prefix) = $fullpath =~ /$rulematch/;
+                if ($debug > 2) {
+                  warn "HUB SITE $fqdn using prefix $prefix";
+                }
+                my $target = $prefix . '.' . $rule->{target};
+                my ($port) = $fqdn =~ m!(\:\d+)!;
+                $port ||= '';
+                $newurl = $proto.'://'.$target.$port.'/'.$path;
+            } else {
                 warn "ERROR - Unknown rule type [".$rule->{type}."]";
                 last;
             }
@@ -243,6 +254,11 @@ A 302 redirect request to the TARGET will be sent back to the client.  TARGET sh
 The request will be forwarded to the static page, use for holding pages etc.  TARGET should include the appropriate protocol.
 
 =back
+
+=item hub
+
+The site follows the hub model. For urls of the form member.example.com, the request will  be forwarded  to member.TARGET using the incoming protocol and path.
+
 
 =item TARGET
 
