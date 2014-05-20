@@ -1,0 +1,6 @@
+http://subdomain.example.com/url 127.0.0.1 - GET example
+http://subdomain2.example.com/url2 127.0.0.1 - POST example
+https://example.com/user/login 127.0.0.1 - POST example
+http://anothersite.example.org/ 127.0.0.1 - GET anotherexample
+http://redirect.example.org.uk/ 127.0.0.1 - GET redirect
+http://redirect.example.com/dsdf/sdfwe?sdfer=dfer 127.0.0.1 - GET redirect
